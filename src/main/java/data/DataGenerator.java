@@ -1,4 +1,4 @@
-package ru.netology.delivery.data;
+package data;
 
 import com.github.javafaker.Faker;
 import io.restassured.builder.RequestSpecBuilder;
@@ -12,58 +12,58 @@ import java.util.Locale;
 import static io.restassured.RestAssured.given;
 
 public class DataGenerator {
-    private static final RequestSpecification requestSpec = new RequestSpecBuilder()
+
+    private static final Faker FAKER = new Faker(new Locale("en"));
+
+    private static final RequestSpecification request = new RequestSpecBuilder()
             .setBaseUri("http://localhost")
             .setPort(9999)
             .setAccept(ContentType.JSON)
             .setContentType(ContentType.JSON)
             .log(LogDetail.ALL)
             .build();
-    private static final Faker faker = new Faker(new Locale("en"));
 
     private DataGenerator() {
     }
 
-    private static void sendRequest(RegistrationDto user) {
-
+    static void sendRequest(DataGenerator.Registration.RegistrationDto user) {
         given()
-                .spec(requestSpec) // со спецификацией проще (особенно когда много тестов)
+                .spec(request)
                 .body(user)
-
-                .when()
-                .post("api/system/users")
-
-                .then()
+                .when().log().all()
+                .post("/api/system/users")
+                .then().log().all()
                 .statusCode(200);
     }
 
     public static String getRandomLogin() {
-        return faker.name().username();
+        return FAKER.name().username();
     }
 
     public static String getRandomPassword() {
-        return faker.internet().password();
+        return FAKER.internet().password();
     }
+
 
     public static class Registration {
         private Registration() {
         }
 
-        public static RegistrationDto getUser(String status) {
+        public static RegistrationDto getNewUser(String status) {
             return new RegistrationDto(getRandomLogin(), getRandomPassword(), status);
         }
 
         public static RegistrationDto getRegisteredUser(String status) {
-            var registeredUser = getUser(status);
-            sendRequest(registeredUser);
-            return registeredUser;
+            var user = getNewUser(status);
+            sendRequest(user);
+            return user;
         }
-    }
 
-    @Value
-    public static class RegistrationDto {
-        String login;
-        String password;
-        String status;
+        @Value
+        public static class RegistrationDto {
+            String login;
+            String password;
+            String status;
+        }
     }
 }
