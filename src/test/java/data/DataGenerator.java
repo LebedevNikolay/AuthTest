@@ -26,7 +26,7 @@ public class DataGenerator {
     private DataGenerator() {
     }
 
-    static void sendRequest(DataGenerator.Registration.RegistrationDto user) {
+    static void sendRequest(DataGenerator.RegistrationDto user) {
         given()
                 .spec(request)
                 .body(user)
@@ -49,21 +49,21 @@ public class DataGenerator {
         private Registration() {
         }
 
-        public static RegistrationDto getNewUser(String status) {
+        public static RegistrationDto getUser(String status) {
             return new RegistrationDto(getRandomLogin(), getRandomPassword(), status);
         }
 
         public static RegistrationDto getRegisteredUser(String status) {
-            var user = getNewUser(status);
+            var user = getUser(status);
             sendRequest(user);
             return user;
         }
+    }
 
-        @Value
-        public static class RegistrationDto {
-            String login;
-            String password;
-            String status;
-        }
+    @Value
+    public static class RegistrationDto {
+        String login;
+        String password;
+        String status;
     }
 }
